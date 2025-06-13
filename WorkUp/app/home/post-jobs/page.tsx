@@ -8,12 +8,13 @@ import { Form,FormField, FormItem, FormLabel, FormControl, FormDescription, Form
 import { Input } from '@/components/ui/input'
 import { useForm } from 'react-hook-form'
 import { useUser } from '@clerk/nextjs'
-import { createClerkSupabaseClient } from '@/app/supabase/supabasecClient'
+import  createClerkSupabaseClient  from '@/app/supabase/supabasecClient'
 import CompanyDialog  from '@/components/shared/AddCompany'
 import RichTextEditor from '@/components/shared/Editor'
 import CompanySeletor from '@/components/shared/CompanySeletor'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {State} from 'country-state-city'
+import { redirect } from 'next/navigation'
 
 const postSchema = z.object({
   title: z.string().min(1, {message: "Please enter Job title.",}),
@@ -23,12 +24,15 @@ const postSchema = z.object({
   workplace:z.string().min(1,{message:"Please enter Workplace"}),
 })
 
+
 const PostJobs = () => {
+  
   const [content, setContent] = useState<string>("");
   const {user} = useUser()
   const client = createClerkSupabaseClient()
   const [loading, setLoading] = useState(true)
-  const [Jobs,setJobs] = useState<any[]>([])
+  const [jobs,setJobs] = useState<any[]>([])
+  const [date,setDate] = useState<Date | undefined>(new Date())
 
   const form = useForm<z.infer<typeof postSchema>>({
     resolver: zodResolver(postSchema),
@@ -38,25 +42,10 @@ const PostJobs = () => {
       location:"",
       jobtype:"",
       workplace:"",
-
     },
   })
 
-  useEffect(() => {
-      if (!user) return
-  
-      async function loadJobs() {
-        setLoading(true)
-        const { data, error } = await client.from('postjob').select()
-        if (!error) setJobs(data)
-        setLoading(false)
-      }
-  
-      loadJobs()
-    }, [user])
-
   async function onSubmit(values: z.infer<typeof postSchema>) {
-     
     const {error} = await client.from('postjob').insert({
       title:values.title,
       company:values.company,
@@ -72,7 +61,7 @@ const PostJobs = () => {
     alert("Error saving job. Check console.")
     return
     }
-    window.location.reload()
+    redirect('/home/job-list')
     console.log(values)
   }
 
@@ -83,13 +72,13 @@ const PostJobs = () => {
           <div className=''>
             {loading && <p>Loading...</p>}
 
-            {!loading && Jobs.length > 0 && Jobs.map((job: any) =><div key={job.id}> <p >{job.title}</p>
+            {!loading && jobs.length > 0 && jobs.map((job: any) =><div key={job.id}> <p >{job.title}</p>
             <div className="prose dark:prose-invert max-w-none mt-4"
             dangerouslySetInnerHTML={{ __html: job.jobdesc }} />
             </div>
             )}
 
-            {!loading && Jobs.length === 0 && <p>No Jobs found</p>}
+            {!loading && jobs.length === 0 && <p>No Jobs found</p>}
             <FormField
               control={form.control}
               name="title"
@@ -141,9 +130,22 @@ const PostJobs = () => {
               name="jobtype"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Job Type</FormLabel>
                   <FormControl>
-                    <Input placeholder="Full-Time" {...field} />
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select Job type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="Full Time">Full Time</SelectItem>
+                          <SelectItem value="Part Time">Part Time</SelectItem>
+                          <SelectItem value="Internship">Internship</SelectItem>
+                          <SelectItem value="Contract">Contract</SelectItem>
+                          <SelectItem value="Volunteer">Volunteer</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -156,7 +158,18 @@ const PostJobs = () => {
                 <FormItem>
                   <FormLabel>Workplace</FormLabel>
                   <FormControl>
-                    <Input placeholder="Office" {...field} />
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select workplace" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="On-site">On-site</SelectItem>
+                          <SelectItem value="Remote">Remote</SelectItem>
+                          <SelectItem value="Hybrid">Hybrid</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

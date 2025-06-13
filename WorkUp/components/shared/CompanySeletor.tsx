@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/popover"
 import { useUser } from "@clerk/nextjs"
 import { CheckIcon, ChevronsUpDown } from "lucide-react"
-import { createClerkSupabaseClient } from "@/app/supabase/supabasecClient"
-import { cn } from "@/lib/utils"
+import  createClerkSupabaseClient  from "@/app/supabase/supabasecClient"
+import { cn } from "@/lib/utils"  
 
 interface CompanySelectorProps {
   value?: string;
@@ -42,7 +42,7 @@ const CompanySeletor = ({ value, onChange }: CompanySelectorProps) => {
         }
 
         loadCompanies()
-    }, [user])
+    }, [user,supabase])
 
   return (
     <div>

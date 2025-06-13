@@ -1,4 +1,4 @@
-import  {createClerkSupabaseClient} from '../../app/supabase/supabasecClient'
+import  createClerkSupabaseClient from '../../app/supabase/supabasecClient'
 import { Button } from "@/components/ui/button"
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from'@/components/ui/form'
 import {

@@ -1,20 +1,45 @@
-import { SignedIn, UserButton } from '@clerk/nextjs'
-import React from 'react'
-import { ModeToggle } from '../../app/page'
+// components/shared/Topbar.tsx
+"use client"; // This component now needs client-side interactivity
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
+import { Menu, X } from 'lucide-react'; // Icons for the hamburger menu
+
+import { ModeToggle } from '../../app/page'; // Assuming this path is correct
+import { Button } from '../ui/button'; // Assuming you have a Button component from shadcn/ui
 
 const Topbar = () => {
   return (
-    <section className='flex-row sticky top-0'>
-      <div className='flex py-3 px-4'>
-        <div className='flex '><ModeToggle /></div>
-        <div className='flex'>
+    <header className="sticky top-0 z-50 w-full bg-background border-b border-border">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+        <div className="flex items-center gap-4">
+          <Link href="/" className="text-xl font-semibold text-primary hover:opacity-80">
+            WorkUp
+          </Link>
+          <nav className="hidden md:flex gap-4 text-sm">
+            <Link href="/home/job-list" className="hover:underline">
+              Job Listings
+            </Link>
+            <Link href="/home/post-jobs" className="hover:underline">
+              Post a Job
+            </Link>
+            <Link href="/home/saved-jobs" className="hover:underline">
+              Saved Jobs
+            </Link>
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <ModeToggle />
           <SignedIn>
             <UserButton />
           </SignedIn>
         </div>
       </div>
-    </section>
-  )
-}
+    </header>
+  );
+};
 
-export default Topbar
+export default Topbar;

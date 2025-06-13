@@ -12,6 +12,7 @@ interface RichTextEditorProps {
   onChange?: (content: string) => void;
   editable?: boolean;
 }
+
 export default function RichTextEditor({
   content,
   onChange,
@@ -43,7 +44,7 @@ export default function RichTextEditor({
     editorProps: {
       attributes: {
         class: isEditable
-          ? "min-h-[156px] border border-input rounded-md bg-background text-foreground py-2 px-3 focus:outline-none focus:ring-1 focus:shadow-lg- focus:ring-ring"
+          ? "min-h-[156px] border border-input rounded-md bg-background text-foreground py-2 px-3 focus:outline-none focus:ring-1 focus:shadow-lg focus:ring-ring"
           : "",
       },
     },
