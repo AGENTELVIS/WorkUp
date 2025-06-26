@@ -2,7 +2,8 @@
 
 import { type Metadata } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono } from 'next/font/google'
+import { Toaster } from '@/components/ui/sonner'
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { dark } from '@clerk/themes';
@@ -41,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
             <div className="flex flex-col min-h-screen">
               <Topbar />
-              <main className="flex-1 px-4 py-6">{children}</main>
+              <main className="flex-1 px-4 py-6">{children}<Toaster richColors/></main>
             </div>
           </ThemeProvider>
         </body>

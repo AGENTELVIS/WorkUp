@@ -42,7 +42,7 @@ const CompanySeletor = ({ value, onChange }: CompanySelectorProps) => {
         }
 
         loadCompanies()
-    }, [user,supabase])
+    }, [user])
 
   return (
     <div>

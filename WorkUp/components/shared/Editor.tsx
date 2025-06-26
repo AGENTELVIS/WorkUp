@@ -2,7 +2,7 @@
 
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React from "react";
+import React, { useEffect } from "react";
 import MenuBar from "@/components/shared/Menubar";
 import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
@@ -22,6 +22,7 @@ export default function RichTextEditor({
 
   const editor = useEditor({
     editable: isEditable,
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         bulletList: {
@@ -40,7 +41,7 @@ export default function RichTextEditor({
       }),
       Highlight,
     ],
-    content: content,
+    content,
     editorProps: {
       attributes: {
         class: isEditable
@@ -49,15 +50,21 @@ export default function RichTextEditor({
       },
     },
     onUpdate: ({ editor }) => {
-      // console.log(editor.getHTML());
       if (onChange) onChange(editor.getHTML());
     },
   });
 
+  // ✅ Update editor content when `content` changes externally
+  useEffect(() => {
+    if (editor && content && editor.getHTML() !== content) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
+
   return (
-    <div className="">
+    <div>
       {isEditable && <MenuBar editor={editor} />}
-      <EditorContent editor={editor} className=""/>
+      <EditorContent editor={editor} />
     </div>
   );
 }

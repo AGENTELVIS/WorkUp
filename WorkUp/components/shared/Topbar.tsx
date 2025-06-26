@@ -12,7 +12,7 @@ import { Button } from '../ui/button'; // Assuming you have a Button component f
 
 const Topbar = () => {
   return (
-    <header className="sticky top-0 z-50 w-full bg-background border-b border-border">
+    <header className="sticky top-0 z-50 w-full bg-background border-b border-border shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-4">
           <Link href="/" className="text-xl font-semibold text-primary hover:opacity-80">
@@ -26,7 +26,7 @@ const Topbar = () => {
               Post a Job
             </Link>
             <Link href="/home/saved-jobs" className="hover:underline">
-              Saved Jobs
+              My Jobs
             </Link>
           </nav>
         </div>

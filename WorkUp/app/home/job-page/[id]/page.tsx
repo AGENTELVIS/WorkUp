@@ -4,42 +4,52 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import  createClerkSupabaseClient  from "@/app/supabase/supabasecClient";
+import { ApplyJobDialog } from "@/components/shared/ApplyJob";
+import { useUser } from "@clerk/nextjs";
+import PosterJobView from "@/components/shared/PosterJobView";
+import SeekerJobView from "@/components/shared/SeekerJobView";
+import { getJobWithCounts } from "@/lib/jobsapi";
 
 export default function JobDetailsPage() { 
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
   const supabase = createClerkSupabaseClient();
-
+  const { user } = useUser();
+  const [isJobPoster, setIsJobPoster] = useState(true); 
+  
   useEffect(() => {
     async function fetchJob() {
-      
-      const { data, error } = await supabase
-        .from("postjob")
-        .select("*")
-        .eq("id", id)
-        .single();
+      try {
+        const jobData = await getJobWithCounts(supabase,id as string);
 
-      if (!error) setJob(data);
-      setLoading(false);
+        if (user && jobData.user_id !== user.id) {
+          setIsJobPoster(false);
+        }
+
+        setJob(jobData);
+      } catch (error) {
+        console.error("Failed to fetch job:", error);
+        setJob(null);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    if (id) fetchJob();
-  }, [id]);
+    if (id && user) fetchJob();
+  }, [id, user]);
 
-  if (loading) return <p>Loading...</p>;
-  if (!job) return <p>Job not found</p>;
+if (loading) return <p>Loading...</p>;
+if (!job) return <p>Job not found</p>;
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">{job.title}</h1>
-      <p className="text-gray-600">
-        {job.company} • {job.location}
-      </p>
-      <div
-        className="prose dark:prose-invert mt-6"
-        dangerouslySetInnerHTML={{ __html: job.jobdesc }}
-      />
-    </div>
-  );
-}
+const isPoster = user?.id === job.user_id;
+
+return (
+  <div className="p-6">
+    {isPoster ? (
+      <PosterJobView job={job} setJob={setJob} />
+    ) : (
+      <SeekerJobView job={job} />
+    )}
+  </div>
+);}

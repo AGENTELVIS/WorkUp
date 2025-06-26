@@ -48,7 +48,8 @@ const Joblist = () => {
           {!loading && jobs.length === 0 && <p>No jobs found.</p>}
 
           {!loading &&
-            jobs.map((job: any) => (
+            jobs.filter((job: any) => job.user_id !== user?.id)
+            .map((job: any) => (
               <div key={job.id} className="border-b pb-3">
                 <div className="flex justify-between items-center cursor-pointer">
                   <div onClick={()=>handleClick(job.id)}>

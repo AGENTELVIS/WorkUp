@@ -55,6 +55,37 @@ export function useJobs() {
   return { jobs, loading };
 }
 
+export async function getJobWithCounts(supabase: ReturnType<typeof createClerkSupabaseClient>,jobId: string) {
+
+  // Fetch the job
+  const { data: job, error } = await supabase
+    .from("postjob")
+    .select("*")
+    .eq("id", jobId)
+    .single();
+
+  if (error || !job) throw new Error("Job not found");
+
+  // Fetch applicant count & saved count in parallel
+  const [applicantsRes, savedRes] = await Promise.all([
+    supabase
+      .from("applications")
+      .select("*", { count: "exact", head: true })
+      .eq("job_id", jobId),
+    supabase
+      .from("savedjobs")
+      .select("*", { count: "exact", head: true })
+      .eq("job_id", jobId),
+  ]);
+
+  return {
+    ...job,
+    applicantCount: applicantsRes.count || 0,
+    savedCount: savedRes.count || 0,
+  };
+}
+
+
 export async function saveJob(userId: string, jobId: number){
   const supabase = createClerkSupabaseClient()
   const { data, error } = await supabase.from("saved_jobs").insert({
