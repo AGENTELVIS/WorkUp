@@ -7,13 +7,18 @@ import { useEffect, useState } from "react";
 export function useJobs() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const { user } = useUser();
   const supabase = createClerkSupabaseClient();
 
   // Fetch initial jobs
   const fetchJobs = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("postjob").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase
+    .from("postjob").select("*")
+    .neq('user_id', user?.id)
+    .neq('status', 'closed')
+    
+    .order("created_at", { ascending: false });
     if (!error && data) setJobs(data);
     setLoading(false);
   };
@@ -86,13 +91,21 @@ export async function getJobWithCounts(supabase: ReturnType<typeof createClerkSu
 }
 
 
-export async function saveJob(userId: string, jobId: number){
-  const supabase = createClerkSupabaseClient()
-  const { data, error } = await supabase.from("saved_jobs").insert({
+export async function saveJob(supabase: ReturnType<typeof createClerkSupabaseClient>, userId: string, jobId: number){
+  const { data, error } = await supabase.from("savedjobs").insert({
     user_id: userId,
     job_id: jobId,
   });
-
   if (error) throw error;
   return data;
+}
+
+export async function unsaveJob(supabase: ReturnType<typeof createClerkSupabaseClient>, userId: string, jobId: number) {
+  const { error } = await supabase
+    .from("savedjobs")
+    .delete()
+    .eq("user_id", userId)
+    .eq("job_id", jobId);
+  if (error) throw error;
+  return true;
 }

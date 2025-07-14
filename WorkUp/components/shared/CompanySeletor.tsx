@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { useUser } from "@clerk/nextjs"
-import { CheckIcon, ChevronsUpDown } from "lucide-react"
+import { CheckIcon, ChevronDown, ChevronsUpDown } from "lucide-react"
 import  createClerkSupabaseClient  from "@/app/supabase/supabasecClient"
 import { cn } from "@/lib/utils"  
 
@@ -52,17 +52,17 @@ const CompanySeletor = ({ value, onChange }: CompanySelectorProps) => {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-full min-w-0 justify-between"
         >
           {value || "Select Company..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-full min-w-0 p-0">
         <Command>
-          <CommandInput placeholder="Search framework..." />
+          <CommandInput placeholder="Search company..." />
           <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
+            <CommandEmpty>No Company found.</CommandEmpty>
             <CommandGroup>
               {Companies.map((company) => (
                   <CommandItem

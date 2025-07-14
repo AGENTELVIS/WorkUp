@@ -22,6 +22,10 @@ import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
 import { toast } from 'sonner'
 import { Variable } from 'lucide-react'
 import { toggleVariants } from '../ui/toggle'
+import { Card } from '@/components/ui/card';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export default function PostJobForm() {
   const [content, setContent] = useState<string>("");
@@ -32,6 +36,7 @@ export default function PostJobForm() {
   const hasFetched = useRef(false);
   const router = useRouter();
   const [date,setDate] = useState<Date | undefined>(new Date())
+  const [step, setStep] = useState(1); // Stepper state
 
   const form = useForm<z.infer<typeof postSchema>>({
     resolver: zodResolver(postSchema),
@@ -136,139 +141,205 @@ export default function PostJobForm() {
     redirect("/home/job-list");
   }
 
+  // --- Stepper Navigation ---
+  const goNext = () => setStep((s) => Math.min(s + 1, 2));
+  const goBack = () => setStep((s) => Math.max(s - 1, 1));
+
   return (
-    <>
+    <Card className="w-full max-w-4xl mx-auto mt-8 p-4 sm:p-8 bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-zinc-900 dark:via-zinc-900 dark:to-blue-950 shadow-lg border border-gray-200 dark:border-zinc-800">
+      <h2 className="text-2xl font-bold mb-2 text-blue-600 dark:text-blue-400">{isEditing ? 'Edit Job' : 'Post a New Job'}</h2>
+      <p className="mb-6 text-gray-500 dark:text-gray-300">Fill in the details below to {isEditing ? 'update' : 'create'} your job posting.</p>
+      <div className="flex items-center justify-center gap-4 mb-8">
+        <div className={`flex items-center gap-2 ${step === 1 ? 'font-bold text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>1 <span className="hidden sm:inline">Job Details</span></div>
+        <div className="h-1 w-8 bg-gray-200 dark:bg-zinc-800 rounded" />
+        <div className={`flex items-center gap-2 ${step === 2 ? 'font-bold text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>2 <span className="hidden sm:inline">More Info</span></div>
+      </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Job title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Manager" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="company"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Company Name</FormLabel>
-                  <FormControl>
-                    <CompanySeletor value={field.value} onChange={field.onChange}/>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-            name="location"
-            control={form.control}
-            render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Job Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {State.getStatesOfCountry("IN").map(({ name }) => (
-                      <SelectItem key={name} value={name}>
-                        {name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            )}
-            />
-            <FormField
-              control={form.control}
-              name="jobtype"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select Job type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectItem value="Full Time">Full Time</SelectItem>
-                          <SelectItem value="Part Time">Part Time</SelectItem>
-                          <SelectItem value="Internship">Internship</SelectItem>
-                          <SelectItem value="Contract">Contract</SelectItem>
-                          <SelectItem value="Volunteer">Volunteer</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="workplace"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Workplace</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select workplace" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectItem value="On-site">On-site</SelectItem>
-                          <SelectItem value="Remote">Remote</SelectItem>
-                          <SelectItem value="Hybrid">Hybrid</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="openings"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Number of openings</FormLabel>
-                  <FormControl>
-                    <Input type='number' {...field}/>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="screeningquestions"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Screening Questions</FormLabel>
-                  <ScreeningQuestions
-                    value={screeningQuestions}
-                    onChange={(updated) => setValue("screeningquestions", updated)}
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
+          {step === 1 && (
+            <>
+              <div className="flex flex-col gap-6 w-full">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Job Title</FormLabel>
+                      <FormControl>
+                        <Input className="w-full" placeholder="Manager" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="company"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <div className="flex items-end gap-2 w-full">
+                        <div className="flex-1">
+                          <FormLabel className='mb-2'>Company Name</FormLabel>
+                          <FormControl>
+                            <CompanySeletor value={field.value} onChange={field.onChange}/>
+                          </FormControl>
+                        </div>
+                        <CompanyDialog />
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="location"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Job Location" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {State.getStatesOfCountry("IN").map(({ name }) => (
+                                <SelectItem key={name} value={name}>
+                                  {name}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div>
+                  <h3 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">Job Description</h3>
+                  <RichTextEditor content={content} onChange={setContent} />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 mt-8">
+                <Button type="button" onClick={goNext} className="w-32">Next</Button>
+              </div>
+            </>
+          )}
+          {step === 2 && (
+            <>
+              <div className="flex flex-col gap-6 w-full">
+                <FormField
+                  control={form.control}
+                  name="openings"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Openings</FormLabel>
+                      <FormControl>
+                        <Input className="w-full" type='number' min={1} {...field}/>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div>
+                  <h3 className="font-semibold text-lg rounded-lg mb-2 text-gray-700 dark:text-gray-200">Job Type</h3>
+                  <FormField
+                    control={form.control}
+                    name="jobtype"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormControl>
+                          <ToggleGroup
+                            type="single"
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            className="w-full"
+                          >
+                            {['Full Time','Part Time','Internship','Contract','Volunteer','Other'].map((type) => (
+                              <ToggleGroupItem
+                                key={type}
+                                value={type}
+                                className={cn(
+                                  'border rounded-sm px-4 py-2 mx-1 my-1 transition-colors',
+                                  'bg-white dark:bg-zinc-800',
+                                  'hover:bg-blue-100 dark:hover:bg-blue-950',
+                                  'data-[state=on]:bg-blue-500 data-[state=on]:text-white dark:data-[state=on]:bg-blue-600',
+                                  'border-gray-300 dark:border-zinc-700'
+                                )}
+                              >
+                                {type}
+                              </ToggleGroupItem>
+                            ))}
+                          </ToggleGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <RichTextEditor content={content} onChange={setContent} />
-            <Button type="submit">Submit</Button>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">Workplace</h3>
+                  <FormField
+                    control={form.control}
+                    name="workplace"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormControl>
+                          <ToggleGroup
+                            type="single"
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            className="w-full"
+                          >
+                            {['On-site','Remote','Hybrid'].map((type) => (
+                              <ToggleGroupItem
+                                key={type}
+                                value={type}
+                                className={cn(
+                                  'border rounded-md px-4 py-2 mx-1 my-1 transition-colors',
+                                  'bg-white dark:bg-zinc-800',
+                                  'hover:bg-blue-100 dark:hover:bg-blue-950',
+                                  'data-[state=on]:bg-blue-500 data-[state=on]:text-white dark:data-[state=on]:bg-blue-600',
+                                  'border-gray-300 dark:border-zinc-700'
+                                )}
+                              >
+                                {type}
+                              </ToggleGroupItem>
+                            ))}
+                          </ToggleGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">Screening Questions</h3>
+                  <FormField
+                    control={form.control}
+                    name="screeningquestions"
+                    render={() => (
+                      <FormItem className="w-full">
+                        <ScreeningQuestions
+                          value={screeningQuestions}
+                          onChange={(updated) => setValue("screeningquestions", updated)}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between gap-2 mt-8">
+                <Button type="button" variant="outline" onClick={goBack} className="w-32">Back</Button>
+                <Button type="submit" className="w-32">{isEditing ? 'Update Job' : 'Post Job'}</Button>
+              </div>
+            </>
+          )}
         </form>
-        <CompanyDialog/>
       </Form>
-    </>
+    </Card>
   )
   
 }

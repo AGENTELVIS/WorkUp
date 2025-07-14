@@ -15,19 +15,34 @@ export default function JobDetailsPage() {
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
   const supabase = createClerkSupabaseClient();
-  const { user } = useUser();
-  const [isJobPoster, setIsJobPoster] = useState(true); 
-  
+  const { user, isLoaded } = useUser();
+
   useEffect(() => {
     async function fetchJob() {
+      if (!id) {
+        setLoading(false);
+        return;
+      }
+  
       try {
-        const jobData = await getJobWithCounts(supabase,id as string);
-
-        if (user && jobData.user_id !== user.id) {
-          setIsJobPoster(false);
+        const jobData = await getJobWithCounts(supabase, id as string);
+  
+        const { data: settings, error: settingsError } = await supabase
+          .from("settings")
+          .select("auto_close")
+          .eq("job_id", jobData.id)
+          .maybeSingle(); // ✅ use maybeSingle
+  
+        if (settingsError && settingsError.code !== "PGRST116") {
+          console.error("Error fetching settings:", settingsError);
         }
-
-        setJob(jobData);
+  
+        const jobWithSettings = {
+          ...jobData,
+          settings: settings ?? { auto_close: false }, // fallback
+        };
+  
+        setJob(jobWithSettings);
       } catch (error) {
         console.error("Failed to fetch job:", error);
         setJob(null);
@@ -35,21 +50,23 @@ export default function JobDetailsPage() {
         setLoading(false);
       }
     }
-
-    if (id && user) fetchJob();
+  
+    fetchJob();
   }, [id, user]);
+  
 
-if (loading) return <p>Loading...</p>;
-if (!job) return <p>Job not found</p>;
+  if (loading || !isLoaded) return <p>Loading...</p>;
+  if (!job) return <p>Job not found</p>;
 
-const isPoster = user?.id === job.user_id;
+  const isPoster = user?.id === job.user_id;
 
-return (
-  <div className="p-6">
-    {isPoster ? (
-      <PosterJobView job={job} setJob={setJob} />
-    ) : (
-      <SeekerJobView job={job} />
-    )}
-  </div>
-);}
+  return (
+    <div className="min-h-screen w-full flex flex-col items-start justify-start py-12 px-4">
+      {isPoster ? (
+        <PosterJobView job={job} setJob={setJob} />
+      ) : (
+        <SeekerJobView job={job} />
+      )}
+    </div>
+  );
+} 

@@ -45,7 +45,7 @@ export default function RichTextEditor({
     editorProps: {
       attributes: {
         class: isEditable
-          ? "min-h-[156px] border border-input rounded-md bg-background text-foreground py-2 px-3 focus:outline-none focus:ring-1 focus:shadow-lg focus:ring-ring"
+          ? "min-h-[156px] border border-input rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:shadow-lg focus:ring-ring bg-slate-100 text-gray-800 dark:bg-[#0f172a] dark:text-[#fefce8]"
           : "",
       },
     },
@@ -64,7 +64,7 @@ export default function RichTextEditor({
   return (
     <div>
       {isEditable && <MenuBar editor={editor} />}
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} className=""/>
     </div>
   );
 }

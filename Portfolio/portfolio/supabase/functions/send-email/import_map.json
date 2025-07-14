@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "npm:resend": "https://esm.sh/resend@latest"
+  }
+}
