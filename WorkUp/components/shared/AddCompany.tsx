@@ -1,4 +1,4 @@
-import  {createClerkSupabaseClient} from '../../app/supabase/supabasecClient'
+import  createClerkSupabaseClient from '../../app/supabase/supabasecClient'
 import { Button } from "@/components/ui/button"
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from'@/components/ui/form'
 import {
@@ -17,6 +17,7 @@ import { useUser } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import {z} from "zod"
+import { Plus } from 'lucide-react'
 
 const companySchema = z.object({
   companyname: z.string().min(1, { message: 'Please enter company name' }),
@@ -133,7 +134,7 @@ const CompanyDialog = () => {
               <DialogClose asChild>
                 <Button variant="outline" type="button">Cancel</Button>
               </DialogClose>
-              <Button type="submit">Add</Button>
+              <Button type="submit">Add Company</Button>
             </DialogFooter>
           </form>
         </Form>

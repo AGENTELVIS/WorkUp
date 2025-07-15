@@ -2,7 +2,7 @@
 
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React from "react";
+import React, { useEffect } from "react";
 import MenuBar from "@/components/shared/Menubar";
 import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
@@ -12,6 +12,7 @@ interface RichTextEditorProps {
   onChange?: (content: string) => void;
   editable?: boolean;
 }
+
 export default function RichTextEditor({
   content,
   onChange,
@@ -21,6 +22,7 @@ export default function RichTextEditor({
 
   const editor = useEditor({
     editable: isEditable,
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         bulletList: {
@@ -39,22 +41,28 @@ export default function RichTextEditor({
       }),
       Highlight,
     ],
-    content: content,
+    content,
     editorProps: {
       attributes: {
         class: isEditable
-          ? "min-h-[156px] border border-input rounded-md bg-background text-foreground py-2 px-3 focus:outline-none focus:ring-1 focus:shadow-lg- focus:ring-ring"
+          ? "min-h-[156px] border border-input rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:shadow-lg focus:ring-ring bg-slate-100 text-gray-800 dark:bg-[#0f172a] dark:text-[#fefce8]"
           : "",
       },
     },
     onUpdate: ({ editor }) => {
-      // console.log(editor.getHTML());
       if (onChange) onChange(editor.getHTML());
     },
   });
 
+  // ✅ Update editor content when `content` changes externally
+  useEffect(() => {
+    if (editor && content && editor.getHTML() !== content) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
+
   return (
-    <div className="">
+    <div>
       {isEditable && <MenuBar editor={editor} />}
       <EditorContent editor={editor} className=""/>
     </div>
